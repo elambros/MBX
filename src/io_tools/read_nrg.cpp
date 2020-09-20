@@ -40,7 +40,7 @@ SOFTWARE WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
 
 namespace tools {
 
-void ReadNrg(char* filename, std::vector<bblock::System>& systems) {
+void ReadNrg(char* filename, std::vector<bblock::System>& systems,std::vector<int>* exclude_mons) {
     // Check that filename is not empty
     assert(filename);
     std::ifstream ifs(filename);
@@ -60,7 +60,7 @@ void ReadNrg(char* filename, std::vector<bblock::System>& systems) {
     while (true) {
         // Read system from file
         bblock::System sys;
-        ReadSystem(lineno, ifs, sys);
+        ReadSystem(lineno, ifs, sys,exclude_mons);
 
         // Store system in system vector
         systems.push_back(sys);
@@ -79,7 +79,7 @@ void ReadNrg(char* filename, std::vector<bblock::System>& systems) {
     return;
 }
 
-void ReadSystem(size_t& lineno, std::istream& ifs, bblock::System& sys) {
+void ReadSystem(size_t& lineno, std::istream& ifs, bblock::System& sys,std::vector<int>* exclude_mons) {
     // Check we are not at the end of the file
     if (ifs.eof()) return;
 
@@ -88,7 +88,7 @@ void ReadSystem(size_t& lineno, std::istream& ifs, bblock::System& sys) {
     lineno++;
 
     size_t mon_count = 0;
-
+    std::vector<int> direct_mon_counter={1};
     // Obtain first line. Should be SYSTEM, stating that we are about to
     // start reading a system.
     std::string word;
@@ -114,7 +114,7 @@ void ReadSystem(size_t& lineno, std::istream& ifs, bblock::System& sys) {
 
     // Read molecules while we do not finish the system
     while (word != "endsys") {
-        ReadMolecule(lineno, ifs, sys, mon_count);
+        ReadMolecule(lineno, ifs, sys, mon_count,exclude_mons,&direct_mon_counter);
 
         iss.clear();
 
@@ -136,7 +136,7 @@ void ReadSystem(size_t& lineno, std::istream& ifs, bblock::System& sys) {
     return;
 }
 
-void ReadMolecule(size_t& lineno, std::istream& ifs, bblock::System& sys, size_t& mon_count) {
+void ReadMolecule(size_t& lineno, std::istream& ifs, bblock::System& sys, size_t& mon_count,std::vector<int>* exclude_mons,std::vector<int>* direct_mon_counter) {
     // Check that we are not at the end of the file
     if (ifs.eof()) return;
 
@@ -167,12 +167,12 @@ void ReadMolecule(size_t& lineno, std::istream& ifs, bblock::System& sys, size_t
     }
 
     // Read all monomers of that molecule
-    ReadMonomers(lineno, ifs, sys, mon_count);
+    ReadMonomers(lineno, ifs, sys, mon_count,exclude_mons,direct_mon_counter);
 
     return;
 }
 
-void ReadMonomers(size_t& lineno, std::istream& ifs, bblock::System& sys, size_t& mon_count) {
+void ReadMonomers(size_t& lineno, std::istream& ifs, bblock::System& sys, size_t& mon_count,std::vector<int>* exclude_mons,std::vector<int>* direct_mon_counter) {
     // Check that we are not at the end of the file
     if (ifs.eof()) return;
 
@@ -277,10 +277,21 @@ void ReadMonomers(size_t& lineno, std::istream& ifs, bblock::System& sys, size_t
         }
 
         // Add monomer to system
-        sys.AddMonomer(xyz, names, mon_name);
-        molec.push_back(mon_count);
-        mon_count++;
-
+        bool exclude_mon = false;
+        if (exclude_mons != 0) {
+            if (std::find((*exclude_mons).begin(), (*exclude_mons).end(),(*direct_mon_counter)[0]) != (*exclude_mons).end()) {
+                //std::cout << "excluding monomer " << (*direct_mon_counter)[0] << std::endl;
+                exclude_mon = true;
+            } else {
+                exclude_mon = false;
+            }
+        }
+        if (! exclude_mon){
+            sys.AddMonomer(xyz, names, mon_name);
+            molec.push_back(mon_count);
+            mon_count++;
+        }
+        (*direct_mon_counter)[0]+=1;
         iss.clear();
         std::getline(ifs, line);
         lineno++;

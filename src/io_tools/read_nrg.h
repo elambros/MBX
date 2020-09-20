@@ -69,7 +69,7 @@ namespace tools {
  * @param[out] systems Vector of systems that will be filled with
  * the information in the file
  */
-void ReadNrg(char* filename, std::vector<bblock::System>& systems);
+void ReadNrg(char* filename, std::vector<bblock::System>& systems,std::vector<int>* exclude_mons=0);
 
 /**
  * @brief Reads a system inside the NRG file
@@ -81,7 +81,7 @@ void ReadNrg(char* filename, std::vector<bblock::System>& systems);
  * @param[in,out] sys System that will be filled with
  * the information in the file
  */
-void ReadSystem(size_t& lineno, std::istream& ifs, bblock::System& sys);
+void ReadSystem(size_t& lineno, std::istream& ifs, bblock::System& sys, std::vector<int>* exclude_mons = 0);
 
 /**
  * @brief Reads a molecule of a system
@@ -94,7 +94,7 @@ void ReadSystem(size_t& lineno, std::istream& ifs, bblock::System& sys);
  * the information in the file
  * @param[out] mon_count Number of monomers in the molecule
  */
-void ReadMolecule(size_t& lineno, std::istream& ifs, bblock::System& sys, size_t& mon_count);
+void ReadMolecule(size_t& lineno, std::istream& ifs, bblock::System& sys, size_t& mon_count, std::vector<int>* exclude_mons=0,std::vector<int>* direct_mon_counter=0);
 
 /**
  * @brief Reads a monomer inside a molecule
@@ -107,7 +107,7 @@ void ReadMolecule(size_t& lineno, std::istream& ifs, bblock::System& sys, size_t
  * the information in the file
  * @param[out] mon_count Number of monomers in the molecule
  */
-void ReadMonomers(size_t& lineno, std::istream& ifs, bblock::System& sys, size_t& mon_count);
+void ReadMonomers(size_t& lineno, std::istream& ifs, bblock::System& sys, size_t& mon_count, std::vector<int>* exclude_mons=0,std::vector<int>* direct_mon_counter=0);
 
 }  // namespace tools
 

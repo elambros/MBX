@@ -12,9 +12,10 @@ add_executable(get_2b_energies_list get_2b_energies_list.cpp)
 add_executable(mbd mbd.cpp)
 add_executable(test_virial test_virial.cpp)
 add_executable(test_virial_dimer_scan test_virial_dimer_scan.cpp)
+add_executable(qmmm_test qmmm_test.cpp)
 
 #foreach(t combinations-test energy_wograd-test energy_wgrad-test io-test timing elec_tools-test getset-test pbc-test sys-test)
-foreach(t combinations-test n_single_point test_single_point energy_wograd-test energy_wgrad-test io-test systools-test getset-test system-test bad_inputs-test get_2b_energies_list mbd test_virial test_virial_dimer_scan)
+foreach(t combinations-test n_single_point test_single_point energy_wograd-test energy_wgrad-test io-test systools-test getset-test system-test bad_inputs-test get_2b_energies_list mbd test_virial test_virial_dimer_scan qmmm_test)
 target_include_directories(${t} PRIVATE ${CMAKE_SOURCE_DIR})
 target_include_directories(${t} PRIVATE ${CMAKE_SOURCE_DIR}/../external/)
 

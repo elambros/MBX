@@ -726,6 +726,29 @@ to be the same.
      */
     double Energy(bool do_grads);
 
+    double QMMM_setup(bool do_grads);
+
+    std::string get_qmmm();
+    
+    std::string get_qm_code();
+    
+    std::string get_qm_code_path();
+    
+    std::string get_qm_theory();
+
+    int get_qm_charge();
+
+    int get_qm_spin();   
+ 
+    std::string get_qm_basis();
+    
+    std::vector<int> get_qm_indeces();
+    
+    std::vector<std::string> get_qm_auxparams();
+
+
+
+
     /**
      * Obtains the one-body energy. This is the sum of all the monomer
      * deformation energies.
@@ -1098,6 +1121,22 @@ to be the same.
      * Method used in order to calculate the induced dipoles
      */
     std::string dipole_method_;
+
+    /**
+     * Performing a QM/MM calculation? (yes or no)
+     */
+    std::string qmmm_;
+
+    std::string qm_theory_;
+    std::string qm_basis_;
+    int qm_charge_;
+    int qm_spin_;
+ 
+    std::string qm_code_;
+    std::string qm_code_path_;
+    std::vector<int> qm_index_;
+
+    std::vector<std::string> qm_auxparams_;
 
     /**
      * Vector that contains, in the internal order of the system, the

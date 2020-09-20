@@ -879,6 +879,107 @@ void System::SetUpFromJson(nlohmann::json j) {
     dipole_method_ = dipole_method;
     mbx_j_["MBX"]["dipole_method"] = dipole_method;
 
+    // QM/MM section
+    std::string qmmm;
+    try {
+        qmmm = j["MBX"]["qmmm"];
+    } catch (...) {
+        qmmm = "no";
+        std::cerr << "**WARNING** \"qmmm\" is not defined in json file. Using " << qmmm << "\n";
+    }
+    qmmm_ = qmmm;
+    mbx_j_["MBX"]["qmmm"] = qmmm;
+
+    std::string qm_theory;
+    std::string qm_basis;
+    int qm_charge;
+    int qm_spin;
+    std::string qm_code;
+    std::string qm_code_path;
+    if (qmmm_=="yes") {
+        try {
+            qm_theory = j["MBX"]["qm_theory"];
+        } catch (...) {
+            qm_theory = "";
+            std::cerr << "**WARNING** \"qm_theory\" is not defined in json file. \n";
+        }
+        qm_theory_ = qm_theory;
+        mbx_j_["MBX"]["qm_theory"] = qm_theory;
+
+        try {
+            qm_basis = j["MBX"]["qm_basis"];
+        } catch (...) {
+            qm_basis = "";
+            std::cerr << "**WARNING** \"qm_basis\" is not defined in json file. \n";
+        }
+        qm_basis_ = qm_basis;
+        mbx_j_["MBX"]["qm_basis"] = qm_basis;
+
+        try {
+            qm_charge = j["MBX"]["qm_charge"];
+        } catch (...) {
+            qm_charge = 0;
+            std::cerr << "**WARNING** \"qm_charge\" is not defined in json file. setting charge = 0 \n";
+        }
+        qm_charge_ = qm_charge;
+        mbx_j_["MBX"]["qm_charge"] = qm_charge;
+
+
+        try {
+            qm_spin = j["MBX"]["qm_spin"];
+        } catch (...) {
+            qm_spin = 1;
+            std::cerr << "**WARNING** \"qm_spin\" is not defined in json file. setting to 1 \n";
+        }
+        qm_spin_ = qm_spin;
+        mbx_j_["MBX"]["qm_spin"] = qm_spin;
+
+
+       try {
+            qm_code = j["MBX"]["qm_code"];
+        } catch (...) {
+            qm_code = "";
+            std::cerr << "**WARNING** \"qm_code\" is not defined in json file. \n";
+        }
+        qm_code_ = qm_code;
+        mbx_j_["MBX"]["qm_code"] = qm_code;
+
+       try {
+            qm_code_path = j["MBX"]["qm_code_path"];
+        } catch (...) {
+            qm_code_path = "";
+            std::cerr << "**WARNING** \"qm_code_path\" is not defined in json file. \n";
+        }
+        qm_code_path_ = qm_code_path;
+        mbx_j_["MBX"]["qm_code_path"] = qm_code_path;
+
+
+
+        std::vector<int> qm_index;
+        try {
+            std::vector<int> qm_index2 = j["MBX"]["qm_index"];
+            qm_index = qm_index2;
+        } catch (...) {
+            qm_index.clear();
+            std::cerr << "**WARNING** \"qm_index\" is not defined in json file. No QM atoms.\n";
+        }
+        qm_index_=qm_index;
+
+        std::vector<std::string> qm_auxparams;
+        try {
+            std::vector<std::string> qm_auxparams2 = j["MBX"]["qm_auxparams"];
+            qm_auxparams = qm_auxparams2;
+        } catch (...) {
+            qm_auxparams.clear();
+            std::cerr << "**WARNING** \"qm_auxparams\" is not defined in json file. No auxillary QM parameters.\n";
+        }
+        qm_auxparams_=qm_auxparams;
+
+
+
+
+    }
+
     // Try to get dipole max number of iterations
     // Default: 100
     size_t dipole_max_it;
@@ -1100,6 +1201,12 @@ void System::SetUpFromJson(char *json_file) {
                                   {"ignore_1b_poly", nlohmann::json::array()},
                                   {"ignore_2b_poly", nlohmann::json::array()},
                                   {"ignore_3b_poly", nlohmann::json::array()}}},
+                                  {"qmmm","no"},
+				  {"qm_theory",""},
+                                  {"qm_basis",""},
+                                  {"qm_code",""},
+                                  {"qm_charge",""},
+                                  {"qm_spin",""},
                                 {"i-pi", {{"port", 34543}, {"localhost", "localhost"}}}};
     std::ifstream ifjson;
     nlohmann::json j;
@@ -1379,6 +1486,71 @@ std::vector<size_t> System::AddClustersParallel(size_t nmax, double cutoff, size
 
 void System::SetConnectivity(std::unordered_map<std::string, eff::Conn> connectivity_map) {
     connectivity_map_ = connectivity_map;
+}
+
+double System::QMMM_setup(bool do_grads) {
+    // Check if system has been initialized
+    // If not, throw exception
+    if (!initialized_) {
+        std::string text =
+            std::string("System has not been initialized. ") + std::string("Energy calculation not possible.");
+        throw CUException(__func__, __FILE__, __LINE__, text);
+    }
+    std::cout << "qmmm? " << qmmm_ << std::endl;
+    std::cout << "qm code " << qm_code_ << std::endl;
+    std::cout << "qm code path " << qm_code_path_ << std::endl;
+    std::cout << "qm theory " << qm_theory_ << std::endl; 
+    std::cout << "qm basis " << qm_basis_ << std::endl;
+    std::cout << "qm indeces: " << std::endl;
+    for (int i=0; i<qm_index_.size(); i++) {
+
+	std::cout << qm_index_[i] << std::endl;
+    }
+
+    std::cout << "qm auxillary parameters: " << std::endl;
+    for (int i=0; i<qm_auxparams_.size(); i++) {
+
+        std::cout << qm_auxparams_[i] << std::endl;
+    }
+
+
+    return 0.0;
+}
+
+std::string System::get_qmmm() {
+    return qmmm_;
+}
+
+std::string System::get_qm_code() {
+    return qm_code_;
+}
+
+std::string System::get_qm_code_path() {
+    return qm_code_path_;
+}
+
+std::string System::get_qm_theory() {
+    return qm_theory_;
+}
+
+int System::get_qm_charge() {
+    return qm_charge_;
+}
+
+int System::get_qm_spin() {
+    return qm_spin_;
+}
+
+std::string System::get_qm_basis() {
+    return qm_basis_;
+}
+
+std::vector<int> System::get_qm_indeces() {
+    return qm_index_;
+}
+
+std::vector<std::string> System::get_qm_auxparams() {
+    return qm_auxparams_;
 }
 
 double System::Energy(bool do_grads) {
@@ -2392,6 +2564,7 @@ void System::SetVSites() {
     std::cerr << std::endl;
 #endif  // DEBUG
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
